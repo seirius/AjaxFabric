@@ -75,15 +75,40 @@ AjaxRequest.prototype.addAlwaysExecute = function (alwaysExecute) {
 	}
 };
 
-AjaxRequest.prototype.execute = function () {
+AjaxRequest.prototype.execute = function (onSuccess, beforeSend, alwaysExecute) {
 	try {
-		this.checkErrBeforeExecute();
+		if (this.state != this.STATE_INI) {
+			console.log("Warning: can't execute a Request already executed or in progress.");
+			return;
+		}
+		
+		if (!isString(this.url)) { throw "URL needs to be a String"; }
+		
+		if (!isObject(this.parameters)) { this.parameters = {}; }
+		
+		if (isFunction(onSuccess)) { 
+			this.onSuccess     = onSuccess; 
+		} else if (!isFunction(this.onSuccess)) {
+			this.addOnSuccess(function () {});
+		}
+		
+		if (isFunction(beforeSend)) { 
+			this.beforeSend    = beforeSend; 
+		} else if (!isFunction(this.beforeSend)) {
+			this.addBeforeSend(function () {});
+		}
+		
+		if (isFunction(alwaysExecute)) { 
+			this.alwaysExecute = alwaysExecute; 
+		} else if (!isFunction(this.alwaysExecute)) {
+			this.addAlwaysExecute(function () {});
+		}
 		
 		return $.ajax({
 			ajaxRequest: this,
 			url:         this.url,
 			dataType:    this.dataType,
-			data:        parameters,
+			data:        this.parameters,
 			beforeSend:  this.beforeSend,
 			success: [
 				         this.loadData,
@@ -131,26 +156,6 @@ AjaxRequest.prototype.loadData = function (response) {
 		console.log("Error in AjaxRequest.loadData().\nDetails: " + e);
 	}
 };
-
-AjaxRequest.prototype.checkErrBeforeExecute = function () {
-	try {
-		if (!isObject(this.parameters)) {
-			parameters = {};
-		}
-		if (isUndefined(this.beforeSend)) {
-			this.addBeforeSend(function () {});
-		}
-		if (isUndefined(this.onSuccess)) {
-			this.addOnSuccess(function () {});
-		}
-		if (isUndefined(this.alwaysExecute)) {
-			this.addAlwaysExecute(function () {});
-		}
-		
-	} catch(e) {
-		console.log("Error in AjaxRequest.checkErrBeforeExecute().\nDetails: " + e);
-	}
-}
 
 AjaxRequest.prototype.isDone = function () {
 	try {

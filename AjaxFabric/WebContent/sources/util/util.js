@@ -14,3 +14,7 @@ function isObject(element) {
 function isBoolean(element) {
 	return typeof element == "boolean";
 }
+
+function isString(element) {
+	return typeof element == "string";
+}

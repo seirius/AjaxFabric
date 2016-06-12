@@ -116,10 +116,7 @@ AjaxFabric.prototype.executeAll = function () {
 		var i = 0;
 		var length = this.ajaxs.length;
 		for (i; i < length; i++) {
-			var ajaxRequest = this.ajaxs[i];
-			if (!ajaxRequest.isDone() && !ajaxRequest.inProgress()) {
-				ajaxRequest.execute();
-			}
+			this.ajaxs[i].execute();
 		}
 	} catch(e) {
 		console.log("Error in AjaxFabric.executeAll().\nDetails: " + e);
@@ -135,10 +132,7 @@ AjaxFabric.prototype.executeSome = function (names) {
 		var i = 0;
 		var length = names.length;
 		for (i; i < length; i++) {
-			var ajaxRequest = this.getAjaxRequest(names[i]);
-			if (!ajaxRequest.isDone() && !ajaxRequest.inProgress()) {
-				ajaxRequest.execute();
-			}
+			this.getAjaxRequest(names[i]).execute();
 		}
 	} catch(e) {
 		console.log("Error in AjaxFabric.executeSome().\nDetails: " + e);
