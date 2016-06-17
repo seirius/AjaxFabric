@@ -18,3 +18,11 @@ function isBoolean(element) {
 function isString(element) {
 	return typeof element == "string";
 }
+
+function isEmpty(element) {
+	if (typeof element == "undefined" || element == null || element == "") {
+		return true;
+	} else {
+		return false;
+	}
+}
