@@ -119,7 +119,7 @@ AjaxRequest.prototype.execute = function (onSuccess, beforeSend, alwaysExecute) 
 			          ],
 			error: [
 				         this.treatJQErrors,
-				         this.alwatsExecute,
+				         this.alwaysExecute,
 				         this.handleFabric
 			       ]
 		});
@@ -130,8 +130,9 @@ AjaxRequest.prototype.execute = function (onSuccess, beforeSend, alwaysExecute) 
 
 AjaxRequest.prototype.treatJQErrors = function (error) {
 	try {
-		this.errorCode    = -2;
-		this.errorMessage = error;
+		var ajaxRequest = this.ajaxRequest;
+		ajaxRequest.errorCode    = -2;
+		ajaxRequest.errorMessage = error;
 	} catch(e) {
 		console.log("Error in AjaxRequest.treatJQErrors().\nDetails: " + e);
 	}
