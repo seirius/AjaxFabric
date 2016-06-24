@@ -4,6 +4,8 @@ function AjaxRequest (url, parameters) {
 	
 	this.response;
 	this.dataType = "json";
+	this.type = "POST";
+	this.async = true;
 	
 	this.errorCode = 0;
 	this.errorMessage;
@@ -21,9 +23,10 @@ AjaxRequest.prototype.addBeforeSend = function (beforeSend) {
 				var ajaxRequest = this.ajaxRequest;
 				ajaxRequest.state = ajaxRequest.STATE_PROG;
 				
-				if (!isFunction(beforeSend)) {
+				if ($.type(beforeSend) != "function") {
 					throw "beforeSend is not a Function";
 				}
+				
 				beforeSend(ajaxRequest);
 			} catch(e) {
 				console.log("Error in AjaxRequest.beforeSend().\nDetails: " + e);
@@ -41,9 +44,10 @@ AjaxRequest.prototype.addOnSuccess = function (onSuccess) {
 			try {
 				var ajaxRequest = this.ajaxRequest;
 				
-				if (!isFunction(onSuccess)) {
+				if ($.type(onSuccess) != "function") {
 					throw "onSuccess is not a Function";
 				}
+				
 				onSuccess(ajaxRequest);
 			} catch(e) {
 				console.log("Error in AjaxRequest.onSuccess().\nDetails: " + e);
@@ -61,9 +65,10 @@ AjaxRequest.prototype.addAlwaysExecute = function (alwaysExecute) {
 				var ajaxRequest = this.ajaxRequest;
 				ajaxRequest.state = ajaxRequest.STATE_DONE;
 				
-				if (!isFunction(alwaysExecute)) {
+				if ($.type(alwaysExecute) != "function") {
 					throw "alwaysExecute is not a Function";
 				}
+				
 				alwaysExecute(ajaxRequest);
 			} catch(e) {
 				console.log("Error in AjaxRequest.addAlwaysExecute().\nDetails: " + e);
@@ -75,38 +80,34 @@ AjaxRequest.prototype.addAlwaysExecute = function (alwaysExecute) {
 	}
 };
 
-AjaxRequest.prototype.execute = function (onSuccess, beforeSend, alwaysExecute) {
+AjaxRequest.prototype.execute = function (options) {
 	try {
 		if (this.state != this.STATE_INI) {
 			console.log("Warning: can't execute a Request already executed or in progress.");
 			return;
 		}
 		
-		if (!isString(this.url)) { throw "URL needs to be a String"; }
+		var settings = $.extend({
+			onSuccess: function () {},
+			beforeSend: function () {},
+			alwaysExecute: function () {}
+		}, options);
 		
-		if (!isObject(this.parameters)) { this.parameters = {}; }
-		
-		if (isFunction(onSuccess)) { 
-			this.onSuccess     = onSuccess; 
-		} else if (!isFunction(this.onSuccess)) {
-			this.addOnSuccess(function () {});
+		if ($.type(settings.onSuccess) == "function") {
+			this.addOnSuccess(settings.onSuccess);
 		}
-		
-		if (isFunction(beforeSend)) { 
-			this.beforeSend    = beforeSend; 
-		} else if (!isFunction(this.beforeSend)) {
-			this.addBeforeSend(function () {});
+		if ($.type(settings.beforeSend) == "function") {
+			this.addBeforeSend(settings.beforeSend);
 		}
-		
-		if (isFunction(alwaysExecute)) { 
-			this.alwaysExecute = alwaysExecute; 
-		} else if (!isFunction(this.alwaysExecute)) {
-			this.addAlwaysExecute(function () {});
+		if ($.type(settings.alwaysExecute) == "function") {
+			this.addAlwaysExecute(settings.alwaysExecute);
 		}
 		
 		return $.ajax({
 			ajaxRequest: this,
 			url:         this.url,
+			type:        this.type,
+			async:       this.async,
 			dataType:    this.dataType,
 			data:        this.parameters,
 			beforeSend:  this.beforeSend,
@@ -130,9 +131,11 @@ AjaxRequest.prototype.execute = function (onSuccess, beforeSend, alwaysExecute) 
 
 AjaxRequest.prototype.treatJQErrors = function (error) {
 	try {
-		var ajaxRequest = this.ajaxRequest;
-		ajaxRequest.errorCode    = -2;
-		ajaxRequest.errorMessage = error;
+		if (error.status != 200) {
+			var ajaxRequest = this.ajaxRequest;
+			ajaxRequest.errorCode    = -2;
+			ajaxRequest.errorMessage = error;
+		}
 	} catch(e) {
 		console.log("Error in AjaxRequest.treatJQErrors().\nDetails: " + e);
 	}
@@ -185,8 +188,8 @@ AjaxRequest.prototype.isInit = function () {
 AjaxRequest.prototype.handleFabric = function () {
 	try {
 		var ajaxRequest = this.ajaxRequest;
-		var fabric      = ajaxRequest.fabric;
-		if (!isUndefined(fabric)) {
+		var fabric = ajaxRequest.fabric;
+		if ($.type(fabric) != "undefined") {
 			fabric.executeSharedFunctions(ajaxRequest.name);
 		}
 	} catch(e) {
