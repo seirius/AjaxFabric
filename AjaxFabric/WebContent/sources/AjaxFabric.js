@@ -7,12 +7,17 @@ AjaxFabric.prototype.addNewAjaxRequest = function (url, parameters, name) {
 	var ajaxRequest;
 	
 	try {
-		ajaxRequest = new AjaxRequest(url, parameters);
-		ajaxRequest.name = name;
+		if ($.type(url) == "string") {
+			ajaxRequest = new AjaxRequest(url, parameters);
+			ajaxRequest.name = name;
+		} else {
+			url.execute = false;
+			ajaxRequest = new AjaxRequest(url);
+		}
 		ajaxRequest.fabric = this;
 		this.ajaxs.push(ajaxRequest);
 	} catch(e) {
-		console.log("Error in AjaxFabric.addNewAjaxRequest().\nDetails: " + e);
+		console.log("Error in AjaxFabric.addNewAjaxRequest().\n" + e);
 	}
 	
 	return ajaxRequest;
@@ -31,7 +36,7 @@ AjaxFabric.prototype.getAjaxRequest = function (name) {
 			}
 		}
 	} catch(e) {
-		console.log("Error in AjaxFabric.getAjaxRequest().\nDetails: " + e);
+		console.log("Error in AjaxFabric.getAjaxRequest().\n" + e);
 	}
 	
 	return ajaxRequest;
@@ -39,26 +44,15 @@ AjaxFabric.prototype.getAjaxRequest = function (name) {
 
 AjaxFabric.prototype.addSharedFunction = function (sharedFunction, ajaxNames, executeWithErrors) {
 	try {
-		if (!isFunction(sharedFunction)) {
-			throw "sharedFunction is not a functions";
-		} else if (!Array.isArray(ajaxNames)) {
-			throw "ajaxNames is not an Array";
-		} 
-		
-		var executeWEErrorsAux = false;
-		if (isBoolean(executeWithErrors)) {
-			executeWEErrorsAux = executeWithErrors;
-		}
-		
 		this.sharedFunctionsList.push({
 			sharedFunction:    sharedFunction,
 			ajaxNames:         ajaxNames,
 			executed:          false,
-			executeWithErrors: executeWEErrorsAux
+			executeWithErrors: executeWithErrors
 		});
 		
 	} catch(e) {
-		console.log("Error in AjaxFabric.addSharedFunction().\nDetails: " + e);
+		console.log("Error in AjaxFabric.addSharedFunction().\n" + e);
 	}
 }
 
@@ -85,7 +79,7 @@ AjaxFabric.prototype.executeSharedFunctions = function (name) {
 			});
 		});
 	} catch(e) {
-		console.log("Error in AjaxFabric.executeSharedFunctions().\nDetails: " + e);
+		console.log("Error in AjaxFabric.executeSharedFunctions().\n" + e);
 	}
 };
 
@@ -96,7 +90,7 @@ AjaxFabric.prototype.areDone = function (names) {
 			return ajaxFabric.getAjaxRequest(name).isDone();
 		});
 	} catch(e) {
-		console.log("Error in AjaxFabric.areDone().\nDetails: " + e);
+		console.log("Error in AjaxFabric.areDone().\n" + e);
 	}
 };
 
@@ -107,7 +101,7 @@ AjaxFabric.prototype.hasErrors = function (names) {
 			return ajaxFabric.getAjaxRequest(name).errorCode != 0;
 		});
 	} catch(e) {
-		console.log("Error in AjaxFabric.hasErrors().\nDetails: " + e);
+		console.log("Error in AjaxFabric.hasErrors().\n" + e);
 	}
 };
 
@@ -119,23 +113,19 @@ AjaxFabric.prototype.executeAll = function () {
 			this.ajaxs[i].execute();
 		}
 	} catch(e) {
-		console.log("Error in AjaxFabric.executeAll().\nDetails: " + e);
+		console.log("Error in AjaxFabric.executeAll().\n" + e);
 	}
 }
 
 AjaxFabric.prototype.executeSome = function (names) {
 	try {
-		if (!Array.isArray(names)) {
-			throw "Names has to be an Array";
-		}
-		
 		var i = 0;
 		var length = names.length;
 		for (i; i < length; i++) {
 			this.getAjaxRequest(names[i]).execute();
 		}
 	} catch(e) {
-		console.log("Error in AjaxFabric.executeSome().\nDetails: " + e);
+		console.log("Error in AjaxFabric.executeSome().\n" + e);
 	}
 }
 

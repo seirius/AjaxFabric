@@ -1,26 +1,58 @@
-function AjaxRequest (url, parameters) {
-	this.url = url;
-	this.parameters = parameters;
+function AjaxRequest (arg1, parameters) {
+	var settings = $.extend({
+		url: "",
+		selector: "",
+		parameters: {},
+		templates: {},
+		response: "",
+		dataType: "json",
+		type: "POST",
+		async: true,
+		errorCode: 0,
+		errorMessage: "",
+		name: "",
+		mustache: false,
+		execute: true,
+		onSuccess: function () {},
+		beforeSend: function () {},
+		alwaysExecute: function () {}
+	}, arg1);
 	
+	this.url = settings.url;
+	this.selector = settings.selector;
+	this.parameters = settings.parameters;
+	this.templates = settings.templates;
 	this.response;
-	this.dataType = "json";
-	this.type = "POST";
-	this.async = true;
-	
-	this.errorCode = 0;
-	this.errorMessage;
+	this.dataType = settings.dataType;
+	this.type = settings.type;
+	this.async = settings.async;
+	this.errorCode = settings.errorCode;
+	this.errorMessage = settings.errorMessage;
+	this.mustache = settings.mustache;
+	this.name = settings.name;
 	
 	this.STATE_INI  = "INITIAL";
 	this.STATE_PROG = "IN_PROGRESS";
 	this.STATE_DONE = "DONE";
 	this.state = this.STATE_INI; //INITIAL, IN_PROGRESS, DONE
+	this.fabric;
+	
+	this.addBeforeSend(settings.beforeSend);
+	this.addOnSuccess(settings.onSuccess);
+	this.addAlwaysExecute(settings.alwaysExecute);
+	
+	if (settings.execute) {
+		this.execute();
+	}
+	
+	return this;
 }
 
 AjaxRequest.prototype.addBeforeSend = function (beforeSend) {
 	try {
+		var ajaxRequest = this;
 		this.beforeSend = function () {
 			try {
-				var ajaxRequest = this.ajaxRequest;
 				ajaxRequest.state = ajaxRequest.STATE_PROG;
 				
 				if ($.type(beforeSend) != "function") {
@@ -33,6 +65,7 @@ AjaxRequest.prototype.addBeforeSend = function (beforeSend) {
 			}
 		};
 		
+		return ajaxRequest;
 	} catch(e) {
 		console.log("Error in AjaxRequest.addBeforeSend().\nDetails: " + e);
 	}
@@ -40,19 +73,21 @@ AjaxRequest.prototype.addBeforeSend = function (beforeSend) {
 
 AjaxRequest.prototype.addOnSuccess = function (onSuccess) {
 	try {
+		var ajaxRequest = this;
 		this.onSuccess = function () {
 			try {
-				var ajaxRequest = this.ajaxRequest;
-				
 				if ($.type(onSuccess) != "function") {
 					throw "onSuccess is not a Function";
 				}
 				
 				onSuccess(ajaxRequest);
+				
 			} catch(e) {
 				console.log("Error in AjaxRequest.onSuccess().\nDetails: " + e);
 			}
 		};
+		
+		return ajaxRequest;
 	} catch(e) {
 		console.log("Error in AjaxRequest.addOnSuccess().\nDetails: " + e);
 	}
@@ -60,47 +95,44 @@ AjaxRequest.prototype.addOnSuccess = function (onSuccess) {
 
 AjaxRequest.prototype.addAlwaysExecute = function (alwaysExecute) {
 	try {
+		var ajaxRequest = this;
+		
 		this.alwaysExecute = function () {
 			try {
-				var ajaxRequest = this.ajaxRequest;
 				ajaxRequest.state = ajaxRequest.STATE_DONE;
+				
+				if (ajaxRequest.mustache) {
+					ajaxRequest.response = $("<div>").append($.parseHTML(ajaxRequest.response));
+					if (ajaxRequest.selector.length > 0) {
+						ajaxRequest.response = ajaxRequest.response.find(ajaxRequest.selector).html();
+					} else {
+						ajaxRequest.response = ajaxRequest.response.html();
+					}
+					ajaxRequest.response = Mustache.render(ajaxRequest.response, ajaxRequest.templates);
+				}
 				
 				if ($.type(alwaysExecute) != "function") {
 					throw "alwaysExecute is not a Function";
 				}
 				
 				alwaysExecute(ajaxRequest);
+				
 			} catch(e) {
 				console.log("Error in AjaxRequest.addAlwaysExecute().\nDetails: " + e);
 			}
 		};
 		
+		return ajaxRequest;
 	} catch(e) {
 		console.log("Error in AjaxRequest.addAlwaysExecute().\nDetails: " + e);
 	}
 };
 
-AjaxRequest.prototype.execute = function (options) {
+AjaxRequest.prototype.execute = function () {
 	try {
 		if (this.state != this.STATE_INI) {
 			console.log("Warning: can't execute a Request already executed or in progress.");
 			return;
-		}
-		
-		var settings = $.extend({
-			onSuccess: function () {},
-			beforeSend: function () {},
-			alwaysExecute: function () {}
-		}, options);
-		
-		if ($.type(settings.onSuccess) == "function") {
-			this.addOnSuccess(settings.onSuccess);
-		}
-		if ($.type(settings.beforeSend) == "function") {
-			this.addBeforeSend(settings.beforeSend);
-		}
-		if ($.type(settings.alwaysExecute) == "function") {
-			this.addAlwaysExecute(settings.alwaysExecute);
 		}
 		
 		return $.ajax({
@@ -187,7 +219,13 @@ AjaxRequest.prototype.isInit = function () {
 
 AjaxRequest.prototype.handleFabric = function () {
 	try {
-		var ajaxRequest = this.ajaxRequest;
+		var ajaxRequest;
+		if ($.type(this.ajaxRequest) == "undefined") {
+			ajaxRequest = this;
+		} else {
+			ajaxRequest = this.ajaxRequest;
+		}
+		
 		var fabric = ajaxRequest.fabric;
 		if ($.type(fabric) != "undefined") {
 			fabric.executeSharedFunctions(ajaxRequest.name);
