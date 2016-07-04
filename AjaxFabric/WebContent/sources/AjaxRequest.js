@@ -1,3 +1,5 @@
+/* global Mustache */
+
 function AjaxRequest (arg1, parameters) {
 	var settings = $.extend({
 		url: "",
@@ -55,7 +57,7 @@ AjaxRequest.prototype.addBeforeSend = function (beforeSend) {
 			try {
 				ajaxRequest.state = ajaxRequest.STATE_PROG;
 				
-				if ($.type(beforeSend) != "function") {
+				if ($.type(beforeSend) !== "function") {
 					throw "beforeSend is not a Function";
 				}
 				
@@ -76,7 +78,7 @@ AjaxRequest.prototype.addOnSuccess = function (onSuccess) {
 		var ajaxRequest = this;
 		this.onSuccess = function () {
 			try {
-				if ($.type(onSuccess) != "function") {
+				if ($.type(onSuccess) !== "function") {
 					throw "onSuccess is not a Function";
 				}
 				
@@ -111,7 +113,7 @@ AjaxRequest.prototype.addAlwaysExecute = function (alwaysExecute) {
 					ajaxRequest.response = Mustache.render(ajaxRequest.response, ajaxRequest.templates);
 				}
 				
-				if ($.type(alwaysExecute) != "function") {
+				if ($.type(alwaysExecute) !== "function") {
 					throw "alwaysExecute is not a Function";
 				}
 				
@@ -130,7 +132,7 @@ AjaxRequest.prototype.addAlwaysExecute = function (alwaysExecute) {
 
 AjaxRequest.prototype.execute = function () {
 	try {
-		if (this.state != this.STATE_INI) {
+		if (this.state !== this.STATE_INI) {
 			console.log("Warning: can't execute a Request already executed or in progress.");
 			return;
 		}
@@ -163,7 +165,7 @@ AjaxRequest.prototype.execute = function () {
 
 AjaxRequest.prototype.treatJQErrors = function (error) {
 	try {
-		if (error.status != 200) {
+		if (error.status !== 200) {
 			var ajaxRequest = this.ajaxRequest;
 			ajaxRequest.errorCode    = -2;
 			ajaxRequest.errorMessage = error;
@@ -195,7 +197,7 @@ AjaxRequest.prototype.loadData = function (response) {
 
 AjaxRequest.prototype.isDone = function () {
 	try {
-		return this.state == this.STATE_DONE;
+		return this.state === this.STATE_DONE;
 	} catch(e) {
 		console.log("Error in AjaxRequest.isDone().\nDetails: " + e);
 	}
@@ -203,7 +205,7 @@ AjaxRequest.prototype.isDone = function () {
 
 AjaxRequest.prototype.inProgress = function () {
 	try {
-		return this.state == this.STATE_PROG;
+		return this.state === this.STATE_PROG;
 	} catch(e) {
 		console.log("Error in AjaxRequest.inProgress().\nDetails: " + e);
 	}
@@ -211,7 +213,7 @@ AjaxRequest.prototype.inProgress = function () {
 
 AjaxRequest.prototype.isInit = function () {
 	try {
-		return this.state == this.STATE_INI;
+		return this.state === this.STATE_INI;
 	} catch(e) {
 		console.log("Error in AjaxRequest.isInit().\nDetails: " + e);
 	}
@@ -220,14 +222,14 @@ AjaxRequest.prototype.isInit = function () {
 AjaxRequest.prototype.handleFabric = function () {
 	try {
 		var ajaxRequest;
-		if ($.type(this.ajaxRequest) == "undefined") {
+		if ($.type(this.ajaxRequest) === "undefined") {
 			ajaxRequest = this;
 		} else {
 			ajaxRequest = this.ajaxRequest;
 		}
 		
 		var fabric = ajaxRequest.fabric;
-		if ($.type(fabric) != "undefined") {
+		if ($.type(fabric) !== "undefined") {
 			fabric.executeSharedFunctions(ajaxRequest.name);
 		}
 	} catch(e) {

@@ -7,7 +7,7 @@ AjaxFabric.prototype.addNewAjaxRequest = function (url, parameters, name) {
 	var ajaxRequest;
 	
 	try {
-		if ($.type(url) == "string") {
+		if ($.type(url) === "string") {
 			ajaxRequest = new AjaxRequest(url, parameters);
 			ajaxRequest.name = name;
 		} else {
@@ -30,7 +30,7 @@ AjaxFabric.prototype.getAjaxRequest = function (name) {
 		var i = 0;
 		var ajaxs = this.ajaxs;
 		for (i; i < ajaxs.length; i++) {
-			if (ajaxs[i].name == name) {
+			if (ajaxs[i].name === name) {
 				ajaxRequest = ajaxs[i];
 				i = ajaxs.length;
 			}
@@ -54,7 +54,7 @@ AjaxFabric.prototype.addSharedFunction = function (sharedFunction, ajaxNames, ex
 	} catch(e) {
 		console.log("Error in AjaxFabric.addSharedFunction().\n" + e);
 	}
-}
+};
 
 AjaxFabric.prototype.executeSharedFunctions = function (name) {
 	try {
@@ -63,7 +63,7 @@ AjaxFabric.prototype.executeSharedFunctions = function (name) {
 		
 		sharedFunctionsList.forEach(function (value, index) {
 			value.ajaxNames.some(function (value2, index2, ajaxNames) {
-				if (value2 == name) {
+				if (value2 === name) {
 					var ajaxsDone      = ajaxFabric.areDone(ajaxNames);
 					var ajaxsHasErrors = ajaxFabric.hasErrors(ajaxNames);
 					
@@ -98,7 +98,7 @@ AjaxFabric.prototype.hasErrors = function (names) {
 	try {
 		var ajaxFabric = this;
 		return names.some(function (name) {
-			return ajaxFabric.getAjaxRequest(name).errorCode != 0;
+			return ajaxFabric.getAjaxRequest(name).errorCode !== 0;
 		});
 	} catch(e) {
 		console.log("Error in AjaxFabric.hasErrors().\n" + e);
@@ -115,7 +115,7 @@ AjaxFabric.prototype.executeAll = function () {
 	} catch(e) {
 		console.log("Error in AjaxFabric.executeAll().\n" + e);
 	}
-}
+};
 
 AjaxFabric.prototype.executeSome = function (names) {
 	try {
@@ -127,7 +127,7 @@ AjaxFabric.prototype.executeSome = function (names) {
 	} catch(e) {
 		console.log("Error in AjaxFabric.executeSome().\n" + e);
 	}
-}
+};
 
 
 
