@@ -1,6 +1,6 @@
 /* global Mustache */
 
-function AjaxRequest (arg1, parameters) {
+function AjaxRequest (arg1) {
 	var settings = $.extend({
 		url: "",
 		selector: "",
